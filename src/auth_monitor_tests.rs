@@ -134,6 +134,46 @@ pub fn when_reset_time_has_passed_then_reset_failed_attempt_counter() {
 }
 
 #[test]
+pub fn when_ignore_following_auth_fails_time_has_not_passed_then_update_callback_is_not_called() {
+    let mut file = TestFile::not_empty();
+    let options = AuthMonitorOptions {
+        ignore_following_auth_fails_ms: 10,
+        ..AuthMonitorOptions::default()
+    };
+    let mut test = AuthMonitorTest::new(file.path(), options);
+    test.expect_no_update_callback_call();
+
+    let max_failed_attempts = options.max_failed_attempts as usize;
+    let sleep_duration = Duration::from_millis((options.ignore_following_auth_fails_ms + 1) as u64);
+
+    for i in 0usize..max_failed_attempts {
+        file.write_auth_failed_message(i);
+        println!("Sleeping for {} ms", sleep_duration.as_millis());
+        sleep(sleep_duration);
+    }
+
+    test.expect_update_callback_is_called_once();
+}
+
+#[test]
+pub fn when_ignore_following_auth_fails_time_has_passed_then_update_callback_is_called() {
+    let mut file = TestFile::not_empty();
+    let options = AuthMonitorOptions {
+        ignore_following_auth_fails_ms: 10,
+        ..AuthMonitorOptions::default()
+    };
+    let mut test = AuthMonitorTest::new(file.path(), options);
+    test.expect_no_update_callback_call();
+
+    let max_failed_attempts = options.max_failed_attempts as usize;
+
+    for i in 0usize..max_failed_attempts {
+        file.write_auth_failed_message(i);
+        test.expect_no_update_callback_call();
+    }
+}
+
+#[test]
 fn when_file_is_deleted_and_new_one_is_created_then_changes_are_still_monitored() {
     let mut file = TestFile::not_empty();
     let options = AuthMonitorOptions::default();
