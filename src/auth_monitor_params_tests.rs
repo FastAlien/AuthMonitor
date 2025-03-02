@@ -3,7 +3,7 @@ use std::error::Error;
 use crate::assert_error;
 use crate::auth_monitor_options::AuthMonitorOptions;
 use crate::auth_monitor_params::{
-    AuthMonitorParams, IGNORE_FOLLOWING_AUTH_FAILS_MS_OPTION, MAX_FAILED_ATTEMPTS_OPTION,
+    AuthMonitorParams, IGNORE_SUBSEQUENT_FAILS_MS_OPTION, MAX_FAILED_ATTEMPTS_OPTION,
     RESET_AFTER_SECONDS_OPTION,
 };
 
@@ -11,10 +11,10 @@ const FILEPATH: &str = "/var/log/auth.log";
 const ALL_OPTIONS: [&str; 3] = [
     MAX_FAILED_ATTEMPTS_OPTION,
     RESET_AFTER_SECONDS_OPTION,
-    IGNORE_FOLLOWING_AUTH_FAILS_MS_OPTION,
+    IGNORE_SUBSEQUENT_FAILS_MS_OPTION,
 ];
 
-const ZERO_VALUE_ALLOWED_OPTIONS: [&str; 1] = [IGNORE_FOLLOWING_AUTH_FAILS_MS_OPTION];
+const ZERO_VALUE_ALLOWED_OPTIONS: [&str; 1] = [IGNORE_SUBSEQUENT_FAILS_MS_OPTION];
 
 const ZERO_VALUE_NOT_ALLOWED_OPTIONS: [&str; 2] =
     [MAX_FAILED_ATTEMPTS_OPTION, RESET_AFTER_SECONDS_OPTION];
@@ -104,16 +104,16 @@ fn when_parsing_filepath_with_one_option_with_correct_value_then_return_params_w
             true => value,
             false => default_params.options.reset_after_seconds,
         };
-        let ignore_following_auth_fails_ms = match option == IGNORE_FOLLOWING_AUTH_FAILS_MS_OPTION {
+        let ignore_subsequent_fails_ms = match option == IGNORE_SUBSEQUENT_FAILS_MS_OPTION {
             true => value,
-            false => default_params.options.ignore_following_auth_fails_ms,
+            false => default_params.options.ignore_subsequent_fails_ms,
         };
         let expected = AuthMonitorParams {
             filepath: String::from(FILEPATH),
             options: AuthMonitorOptions {
                 max_failed_attempts,
                 reset_after_seconds,
-                ignore_following_auth_fails_ms,
+                ignore_subsequent_fails_ms,
             },
         };
         expect_equals(AuthMonitorParams::from_arguments(&arguments), &expected);
@@ -185,14 +185,14 @@ fn when_parsing_option_allowing_0_with_out_of_range_value_then_invalid_value_err
 fn when_parsing_filename_and_multiple_options_then_return_params_with_parsed_values() {
     let max_failed_attempts = 10;
     let reset_after_seconds = 3600;
-    let ignore_following_auth_fails_ms = 500;
+    let ignore_subsequent_fails_ms = 500;
     let arguments = [
         String::from(FILEPATH),
         format!("--{}={}", MAX_FAILED_ATTEMPTS_OPTION, max_failed_attempts),
         format!("--{}={}", RESET_AFTER_SECONDS_OPTION, reset_after_seconds),
         format!(
             "--{}={}",
-            IGNORE_FOLLOWING_AUTH_FAILS_MS_OPTION, ignore_following_auth_fails_ms
+            IGNORE_SUBSEQUENT_FAILS_MS_OPTION, ignore_subsequent_fails_ms
         ),
     ];
     let expected = AuthMonitorParams {
@@ -200,7 +200,7 @@ fn when_parsing_filename_and_multiple_options_then_return_params_with_parsed_val
         options: AuthMonitorOptions {
             max_failed_attempts,
             reset_after_seconds,
-            ignore_following_auth_fails_ms,
+            ignore_subsequent_fails_ms,
         },
     };
     expect_equals(AuthMonitorParams::from_arguments(&arguments), &expected);

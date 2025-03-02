@@ -3,6 +3,7 @@ use std::fs::{remove_file, rename, File};
 use std::io::Write;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use crate::auth_message_parser::DATE_FORMAT_ISO_8601;
 use chrono::Local;
 
 pub const AUTH_FAILED_TEST_MESSAGES: [&str; 6] = [
@@ -86,7 +87,7 @@ impl TestFile {
     }
 
     fn write_log_message(&mut self, message: &str) {
-        let date_time = Local::now().format("%+");
+        let date_time = Local::now().format(DATE_FORMAT_ISO_8601);
         let line = format!("{} {}\n", date_time, message);
         self.write(&line);
     }

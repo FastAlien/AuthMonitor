@@ -1,5 +1,7 @@
-use crate::auth_message_parser::AuthMessageParser;
+use crate::auth_message_parser::{AuthMessageParser, DATE_FORMAT_ISO_8601};
 use crate::test_utils::test_file::AUTH_FAILED_TEST_MESSAGES;
+use chrono::{Duration, Local};
+use std::ops::Sub;
 
 #[test]
 fn when_message_is_auth_failed_message_then_returns_true() {
@@ -53,5 +55,36 @@ fn when_message_is_not_auth_failed_message_then_returns_false() {
     let parser = AuthMessageParser::new();
     for message in messages.split('\n') {
         assert!(!parser.is_auth_failed_message(message));
+    }
+}
+
+#[test]
+fn when_parsing_message_with_incorrect_datetime_format_then_return_0() {
+    let messages = "2024-02-10T14:26:03.323862+01:0 workstation systemd-logind[2089]: The system will power off now!
+2024-02-10T14:26:03.341715 workstation systemd-logind[2089]: System is powering down.
+2024-02-10T14:34:24.37471+01:00 workstation sudo: pam_unix(sudo:session): session closed for user root
+workstation sudo: pam_unix(sudo:session): session closed for user root";
+    let parser = AuthMessageParser::new();
+    for message in messages.split('\n') {
+        assert_eq!(parser.get_message_timestamp_millis(message), 0);
+    }
+}
+
+#[test]
+fn when_parsing_message_with_correct_datetime_format_then_return_timestamp_in_milliseconds() {
+    let parser = AuthMessageParser::new();
+    let now = Local::now();
+    let date_times = [
+        now,
+        now.sub(Duration::milliseconds(123)),
+        now.sub(Duration::seconds(1234)),
+        now.sub(Duration::minutes(1234)),
+        now.sub(Duration::hours(4)),
+    ];
+    for date_time in date_times {
+        let formatted_date_time = date_time.format(DATE_FORMAT_ISO_8601);
+        let message = format!("{} {}", formatted_date_time, AUTH_FAILED_TEST_MESSAGES[0]);
+        let expected = date_time.timestamp_millis();
+        assert_eq!(parser.get_message_timestamp_millis(&message), expected);
     }
 }

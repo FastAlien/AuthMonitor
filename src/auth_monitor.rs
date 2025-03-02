@@ -36,19 +36,18 @@ impl AuthMonitor {
             if !self.auth_message_parser.is_auth_failed_message(line) {
                 return;
             }
-            if self.options.ignore_following_auth_fails_ms == 0 {
-                failed_attempts += 1;
-                return;
-            }
+            print!("Parsing message: {}", line);
             let auth_failed_timestamp = self.auth_message_parser.get_message_timestamp_millis(line);
-            let millis_since_last_failed_auth =
-                auth_failed_timestamp - self.last_failed_auth_timestamp;
-            if millis_since_last_failed_auth <= self.options.ignore_following_auth_fails_ms as i64 {
-                println!(
-                    "Ignoring auth fail, {} ms since last auth fail",
-                    millis_since_last_failed_auth
-                );
-                return;
+            if self.options.ignore_subsequent_fails_ms > 0 {
+                let millis_since_last_failed_auth =
+                    auth_failed_timestamp - self.last_failed_auth_timestamp;
+                if millis_since_last_failed_auth <= self.options.ignore_subsequent_fails_ms as i64 {
+                    println!(
+                        "Ignoring auth fail, {} ms since last auth fail, timestamp: {}",
+                        millis_since_last_failed_auth, auth_failed_timestamp
+                    );
+                    return;
+                }
             }
             self.last_failed_auth_timestamp = auth_failed_timestamp;
             failed_attempts += 1;
@@ -60,6 +59,9 @@ impl AuthMonitor {
     }
 
     fn should_reset_failed_attempts(&self) -> bool {
+        if self.last_failed_auth_timestamp == 0 {
+            return false;
+        }
         if self.failed_attempts <= 0 || self.failed_attempts >= self.options.max_failed_attempts {
             return false;
         }
