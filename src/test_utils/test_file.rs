@@ -1,9 +1,10 @@
+use chrono::Local;
 use std::env::temp_dir;
 use std::fs::{remove_file, rename, File};
 use std::io::Write;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use chrono::Local;
+use crate::auth_message_parser::DATE_FORMAT_ISO_8601;
 
 pub const AUTH_FAILED_TEST_MESSAGES: [&str; 6] = [
     "workstation sudo: pam_unix(sudo:auth): authentication failure; logname=john uid=1000 euid=0 tty=/dev/pts/7 ruser=john rhost=  user=john",
@@ -86,7 +87,7 @@ impl TestFile {
     }
 
     fn write_log_message(&mut self, message: &str) {
-        let date_time = Local::now().format("%+");
+        let date_time = Local::now().format(DATE_FORMAT_ISO_8601);
         let line = format!("{} {}\n", date_time, message);
         self.write(&line);
     }

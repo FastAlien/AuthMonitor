@@ -1,3 +1,7 @@
+use chrono::DateTime;
+
+pub const DATE_FORMAT_ISO_8601: &str = "%Y-%m-%dT%H:%M:%S.%6f%:z";
+
 pub struct AuthMessageParser {
     patterns: Vec<AuthFailedMessagePattern>,
 }
@@ -35,6 +39,14 @@ impl AuthMessageParser {
             };
         }
         return false;
+    }
+
+    pub fn get_message_timestamp_millis(&self, message: &str) -> i64 {
+        let date_time_str = message.get(0..32).unwrap_or("");
+        return match DateTime::parse_from_str(date_time_str, DATE_FORMAT_ISO_8601) {
+            Ok(date_time) => date_time.timestamp_millis(),
+            Err(_) => 0,
+        };
     }
 }
 
