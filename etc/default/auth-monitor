@@ -6,6 +6,10 @@ MAX_FAILED_ATTEMPTS=5
 # Default: 1800
 RESET_AFTER_SECONDS=1800
 
+# The subsequent authentication failures will be ignored for the specified milliseconds.
+# Default: 0
+IGNORE_SUBSEQUENT_FAILS_MS=100
+
 # The path to the file were authentication logs are stored.
 # Default: /var/log/auth.log
 LOG_FILE=/var/log/auth.log

@@ -3,7 +3,10 @@ Description=AuthMonitor
 
 [Service]
 EnvironmentFile=/etc/default/auth-monitor
-ExecStart=/usr/local/bin/auth-monitor ${LOG_FILE} --max-failed-attempts=${MAX_FAILED_ATTEMPTS} --reset-after-seconds=${RESET_AFTER_SECONDS}
+ExecStart=/usr/local/bin/auth-monitor "${LOG_FILE}" \
+    --max-failed-attempts=${MAX_FAILED_ATTEMPTS} \
+    --reset-after-seconds=${RESET_AFTER_SECONDS} \
+    --ignore-subsequent-fails-ms=${IGNORE_SUBSEQUENT_FAILS_MS}
 Restart=always
 User=auth-monitor
 

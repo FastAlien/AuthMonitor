@@ -12,6 +12,7 @@ const OPTION_VALUE_SEPARATOR_LENGTH: usize = 1;
 
 const MAX_FAILED_ATTEMPTS_OPTION: &str = "max-failed-attempts";
 const RESET_AFTER_SECONDS_OPTION: &str = "reset-after-seconds";
+const IGNORE_SUBSEQUENT_FAILS_MS_OPTION: &str = "ignore-subsequent-fails-ms";
 
 pub struct AuthMonitorParams {
     pub filepath: String,
@@ -45,6 +46,10 @@ impl AuthMonitorParams {
                 }
                 RESET_AFTER_SECONDS_OPTION => {
                     params.options.reset_after_seconds =
+                        Self::parse_option_value(option_name, option_value)?;
+                }
+                IGNORE_SUBSEQUENT_FAILS_MS_OPTION => {
+                    params.options.ignore_subsequent_fails_ms =
                         Self::parse_option_value(option_name, option_value)?;
                 }
                 _ => Err(format!("Unknown option {}", argument))?,
@@ -90,6 +95,12 @@ impl AuthMonitorParams {
             return Err(format!(
                 "{} must be greater than 0",
                 RESET_AFTER_SECONDS_OPTION
+            ))?;
+        }
+        if self.options.ignore_subsequent_fails_ms < 0 {
+            return Err(format!(
+                "{} must be greater than or equal 0",
+                IGNORE_SUBSEQUENT_FAILS_MS_OPTION
             ))?;
         }
         return Ok(());
