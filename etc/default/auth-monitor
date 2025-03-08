@@ -1,8 +1,8 @@
-# The maximum number of failed authentication attempts before the system shutdown.
+# The maximum number of failed authentication attempts before the system shuts down.
 # Default: 5
 MAX_FAILED_ATTEMPTS=5
 
-# The authentication failure counter will reset after the specified seconds.
+# The authentication failure counter will reset after the specified number of seconds.
 # Default: 1800
 RESET_AFTER_SECONDS=1800
 
